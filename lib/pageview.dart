@@ -9,14 +9,19 @@ class Page extends StatefulWidget {
   State<Page> createState() => _PageState();
 }
 
-class _PageState extends State<Page> {
+class _PageState extends State<Page> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     print('build ${widget.text}');
     return Center(
       child: Text(widget.text, textScaleFactor: 5),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class PageViewTestToute extends StatelessWidget {
