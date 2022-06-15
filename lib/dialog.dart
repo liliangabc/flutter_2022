@@ -134,6 +134,161 @@ class ConfirmDialogTest extends StatelessWidget {
   }
 }
 
+class DialogRoute extends StatefulWidget {
+  const DialogRoute({Key? key}) : super(key: key);
+
+  @override
+  State<DialogRoute> createState() => _DialogRouteState();
+}
+
+class _DialogRouteState extends State<DialogRoute> {
+  bool withTree = false;
+
+  @override
+  Widget build(BuildContext context) {
+    showDeleteConfirmDialog2() {
+      withTree = false;
+      return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('提示'),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('您确定要删除当前文件吗?'),
+                Row(
+                  children: [
+                    const Text('同时删除子目录？'),
+                    Builder(builder: (context) {
+                      return Checkbox(
+                        value: withTree,
+                        onChanged: (value) {
+                          setState(() {
+                            (context as Element).markNeedsBuild();
+                            withTree = !withTree;
+                          });
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(withTree);
+                },
+                child: const Text('删除'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    _showModalBottomSheet() {
+      return showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return ListView.builder(
+            itemCount: 30,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text('$index'),
+                onTap: () => Navigator.of(context).pop(index),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    showLoadingDialog() {
+      return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return UnconstrainedBox(
+            constrainedAxis: Axis.vertical,
+            child: SizedBox(
+              width: 280,
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    CircularProgressIndicator(),
+                    Padding(
+                      padding: EdgeInsets.only(top: 26),
+                      child: Text('正在加载，请稍后...'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    _showDatePicker1() {
+      var date = DateTime.now();
+      return showDatePicker(
+        context: context,
+        initialDate: date,
+        firstDate: date,
+        lastDate: date.add(
+          const Duration(days: 30),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        ElevatedButton(
+          onPressed: () async {
+            var delete = await showDeleteConfirmDialog2();
+            if (delete == null) {
+              print('取消删除');
+            } else {
+              print('同时删除子目录：$delete');
+            }
+          },
+          child: const Text('对话框2'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            var type = await _showModalBottomSheet();
+            print(type);
+          },
+          child: const Text('打开底部样式对话框'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            showLoadingDialog();
+          },
+          child: const Text('显示loading'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            var value = await _showDatePicker1();
+            print(value);
+          },
+          child: const Text('打开日期选择器'),
+        ),
+      ],
+    );
+  }
+}
+
 void main(List<String> args) {
   runApp(
     MaterialApp(
@@ -141,7 +296,7 @@ void main(List<String> args) {
         appBar: AppBar(
           title: const Text('对话框'),
         ),
-        body: const ConfirmDialogTest(),
+        body: const DialogRoute(),
       ),
     ),
   );
